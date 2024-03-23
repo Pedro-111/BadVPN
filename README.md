@@ -6,9 +6,9 @@ Este script de Bash permite instalar **BadVPN** en el sistema operativo **Ubuntu
 
 Para instalar este script en tu VPS, simplemente ejecuta el siguiente comando en tu terminal:
 
-\```bash
+```bash
 wget https://raw.githubusercontent.com/Pedro-111/BadVPN/main/installer.sh -O instalador.sh && chmod +x instalador.sh && ./instalador.sh
-\```
+```
 
 ## 🛠️ Uso
 

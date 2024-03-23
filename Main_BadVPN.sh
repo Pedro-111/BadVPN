@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# Definir colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Función para instalar BadVPN
 install_badvpn() {
-    # Comprueba si BadVPN ya está instalado
     if [ -d ~/badvpn-1.999.128 ]; then
         echo "BadVPN ya está instalado."
         return 1
@@ -28,7 +26,6 @@ install_badvpn() {
 # Función para mostrar los puertos de BadVPN activos
 show_active_badvpn_ports() {
     echo "Mostrando los puertos de BadVPN activos..."
-    # Utiliza lsof para encontrar todos los procesos de BadVPN y mostrar sus puertos
     lsof -i | grep badvpn
 }
 
@@ -36,19 +33,16 @@ show_active_badvpn_ports() {
 open_badvpn_port() {
     port=$1
     echo "Abriendo el puerto $port de BadVPN..."
-    # Aquí iría el código para abrir el puerto especificado de BadVPN
     badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
 }
 # Función para cerrar puerto BadVPN
 close_badvpn_port() {
     port=$1
     echo "Cerrando el puerto $port de BadVPN..."
-    # Obtén el ID del proceso que está escuchando en el puerto especificado
     pid=$(lsof -t -i:$port)
     if [ -z "$pid" ]; then
         echo "No se encontró ningún proceso escuchando en el puerto $port."
     else
-        # Intenta terminar el proceso
         if kill $pid; then
             echo "El puerto $port de BadVPN ha sido cerrado."
         else
@@ -60,12 +54,10 @@ close_badvpn_port() {
 # Función para cerrar todos los puertos de BadVPN
 close_all_badvpn_ports() {
     echo "Cerrando todos los puertos de BadVPN..."
-    # Obtén los IDs de todos los procesos de BadVPN
     pids=$(pgrep badvpn-udpgw)
     if [ -z "$pids" ]; then
         echo "No se encontraron procesos de BadVPN."
     else
-        # Termina cada proceso de BadVPN
         for pid in $pids; do
             if kill $pid; then
                 echo "El proceso de BadVPN con PID $pid ha sido cerrado."
@@ -79,7 +71,6 @@ close_all_badvpn_ports() {
 # Función para desinstalar BadVPN
 uninstall_badvpn() {
     echo "Desinstalando BadVPN..."
-    # Intenta eliminar los archivos de BadVPN
     if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; then
         echo "BadVPN ha sido desinstalado."
         close_all_badvpn_ports

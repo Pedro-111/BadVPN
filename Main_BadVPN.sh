@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 # Función para instalar BadVPN
 install_badvpn() {
     # Comprueba si BadVPN ya está instalado
-    if [ -d "~/badvpn-1.999.128" ]; then
+    if [ -d ~/badvpn-1.999.128 ]; then
         echo "BadVPN ya está instalado."
         return 1
     fi

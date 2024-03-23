@@ -72,12 +72,34 @@ close_badvpn_port() {
     fi
 }
 
+# Función para cerrar todos los puertos de BadVPN
+close_all_badvpn_ports() {
+    echo "Cerrando todos los puertos de BadVPN..."
+    # Obtén los IDs de todos los procesos de BadVPN
+    pids=$(pgrep badvpn-udpgw)
+    if [ -z "$pids" ]
+    then
+        echo "No se encontraron procesos de BadVPN."
+    else
+        # Termina cada proceso de BadVPN
+        for pid in $pids
+        do
+            if kill $pid ; then
+                echo "El proceso de BadVPN con PID $pid ha sido cerrado."
+            else
+                echo "Hubo un error al intentar cerrar el proceso de BadVPN con PID $pid."
+            fi
+        done
+    fi
+}
+
 # Función para desinstalar BadVPN
 uninstall_badvpn() {
     echo "Desinstalando BadVPN..."
     # Intenta eliminar los archivos de BadVPN
     if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2 ; then
         echo "BadVPN ha sido desinstalado."
+        close_all_badvpn_ports
     else
         echo "Hubo un error al intentar desinstalar BadVPN."
     fi

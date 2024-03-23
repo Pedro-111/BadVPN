@@ -29,7 +29,7 @@ install_badvpn() {
 show_active_badvpn_ports() {
     echo "Mostrando los puertos de BadVPN activos..."
     # Utiliza lsof para encontrar todos los procesos de BadVPN y mostrar sus puertos
-    lsof -i | grep badvpn-udpgw
+    lsof -i | grep badvpn
 }
 
 # Función para abrir un puerto de BadVPN

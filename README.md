@@ -7,7 +7,7 @@ Para instalar este script en tu VPS, simplemente ejecuta el siguiente comando en
 
 ```bash
 wget https://raw.githubusercontent.com/Pedro-111/BadVPN/main/installer.sh -O instalador.sh && chmod +x instalador.sh && ./instalador.sh
-
+'''
 ## Uso
 
 Para usar este script, simplemente ejecútalo en la terminal con el comando `menu_badvpn`. Se te presentará un menú con las siguientes opciones:

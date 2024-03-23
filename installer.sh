@@ -4,7 +4,7 @@
 mkdir -p /menu/
 
 # Descarga el script de GitHub
-wget https://raw.githubusercontent.com/Pedro-111/BadVPN/main/Main_BadVPN.sh?token=GHSAT0AAAAAACOPMOLVDWJYOS4BVKBPAI2QZP7JCHQ -O /menu/Main_BadVPN.sh
+wget https://raw.githubusercontent.com/Pedro-111/BadVPN/main/Main_BadVPN.sh -O /menu/Main_BadVPN.sh
 
 # Dale permisos de ejecución al script
 chmod +x /menu/Main_BadVPN.sh

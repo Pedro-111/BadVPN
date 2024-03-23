@@ -24,8 +24,7 @@ Para usar este script, simplemente ejecútalo en la terminal con el comando `men
 ## 📦 Dependencias
 
 Este script depende de los siguientes paquetes: cmake, screen, wget, gcc, build-essential, g++, make. Estos paquetes se instalarán automáticamente cuando elijas la opción de instalar BadVPN.
-## Ejecucion
-!https://visortmo.com/library/manhwa/60696/de-un-simple-soldado-a-monarca
+
 ## ⚠️ Advertencia
 
 Este script fue probado en Ubuntu y puede que necesites ajustarlo para que funcione en tu sistema específico. Te recomendamos probar estos comandos en un entorno seguro antes de usarlos en un sistema en producción. 

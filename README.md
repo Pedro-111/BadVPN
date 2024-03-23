@@ -21,4 +21,5 @@ Este script es solo un ejemplo y puede que necesites ajustarlo para que funcione
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la licencia MIT.
+Este proyecto está licenciado bajo los términos de la Licencia Apache 2.0.
+

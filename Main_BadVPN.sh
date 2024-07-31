@@ -149,7 +149,8 @@ uninstall_badvpn() {
 # Función para eliminar el script
 delete_script() {
     # Pregunta al usuario si desea eliminar el script
-    read -p "${YELLOW}¿Estás seguro de que deseas eliminar este script? Esto eliminará el archivo del script. (s/n) ${NC}" confirm
+    echo -e "${YELLOW}¿Estás seguro de que deseas eliminar este script? Esto eliminará el archivo del script.${NC}"
+    read -p "¿Deseas continuar? (s/n): " confirm
     if [[ $confirm != [sS] ]]; then
         echo -e "${RED}Eliminación del script cancelada.${NC}"
         return
@@ -170,6 +171,7 @@ delete_script() {
         echo -e "${RED}✘ No se pudo encontrar el script para eliminarlo.${NC}"
     fi
 }
+
 
 # Función para mostrar el menú
 show_menu() {

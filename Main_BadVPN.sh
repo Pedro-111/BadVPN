@@ -85,10 +85,10 @@ close_badvpn_port() {
     if validate_port $port; then
         echo -e "${BLUE}Cerrando el puerto $port de BadVPN...${NC}"
         pid=$(lsof -t -i:$port)
-        if [ -z "$pid" ]; entonces
+        if [ -z "$pid" ]; then
             echo -e "${YELLOW}No se encontró ningún proceso escuchando en el puerto $port.${NC}"
         else
-            if kill $pid; entonces
+            if kill $pid; then
                 echo -e "${GREEN}✔ El puerto $port de BadVPN ha sido cerrado.${NC}"
                 log_action "Puerto $port de BadVPN cerrado"
             else
@@ -102,11 +102,11 @@ close_badvpn_port() {
 close_all_badvpn_ports() {
     echo -e "${BLUE}Cerrando todos los puertos de BadVPN...${NC}"
     pids=$(pgrep badvpn-udpgw)
-    if [ -z "$pids" ]; entonces
+    if [ -z "$pids" ]; then
         echo -e "${YELLOW}No se encontraron procesos de BadVPN.${NC}"
     else
         for pid in $pids; do
-            if kill $pid; entonces
+            if kill $pid; then
                 echo -e "${GREEN}✔ El proceso de BadVPN con PID $pid ha sido cerrado.${NC}"
                 log_action "Proceso de BadVPN con PID $pid cerrado"
             else
@@ -119,7 +119,7 @@ close_all_badvpn_ports() {
 # Función para desinstalar BadVPN y eliminar archivos descargados
 uninstall_badvpn() {
     echo -e "${BLUE}Desinstalando BadVPN...${NC}"
-    if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; entonces
+    if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; then
         echo -e "${GREEN}✔ BadVPN ha sido desinstalado.${NC}"
         close_all_badvpn_ports
         log_action "BadVPN desinstalado"
@@ -128,7 +128,7 @@ uninstall_badvpn() {
     fi
 
     # Eliminación de archivos descargados
-    if [ -f ~/badvpn-1.999.128.tar.bz2 ]; entonces
+    if [ -f ~/badvpn-1.999.128.tar.bz2 ]; then
         rm ~/badvpn-1.999.128.tar.bz2
         echo -e "${GREEN}✔ Archivos descargados han sido eliminados.${NC}"
         log_action "Archivos descargados eliminados"

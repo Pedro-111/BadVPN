@@ -146,6 +146,24 @@ uninstall_badvpn() {
     fi
 }
 
+# Función para eliminar el script
+delete_script() {
+    # Pregunta al usuario si desea eliminar el script
+    read -p "${YELLOW}¿Estás seguro de que deseas eliminar este script? Esto eliminará el archivo del script. (s/n) ${NC}" confirm
+    if [[ $confirm != [sS] ]]; then
+        echo -e "${RED}Eliminación del script cancelada.${NC}"
+        return
+    fi
+
+    echo -e "${BLUE}Eliminando el script...${NC}"
+    script_name=$(basename "$0")
+    if rm "$0"; then
+        echo -e "${GREEN}✔ El script ha sido eliminado.${NC}"
+        log_action "Script eliminado"
+    else
+        echo -e "${RED}✘ Hubo un error al intentar eliminar el script.${NC}"
+    fi
+}
 
 # Función para mostrar el menú
 show_menu() {
@@ -157,6 +175,7 @@ show_menu() {
     echo -e "${BLUE}║${NC} 3) Abrir puerto             ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 4) Cerrar puerto            ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 5) Desinstalar BadVPN       ${BLUE}║${NC}"
+    echo -e "${BLUE}║${NC} 6) Eliminar script          ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 0) Salir                    ${BLUE}║${NC}"
     echo -e "${BLUE}╚════════════════════════════╝${NC}"
 }
@@ -188,6 +207,10 @@ while true; do
     5)
         echo -e "${YELLOW}Has seleccionado Desinstalar BadVPN.${NC}"
         uninstall_badvpn
+        ;;
+    6)
+        echo -e "${YELLOW}Has seleccionado Eliminar script.${NC}"
+        delete_script
         ;;
     0)
         echo -e "${GREEN}Saliendo...${NC}"

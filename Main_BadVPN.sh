@@ -36,7 +36,6 @@ install_badvpn() {
         echo -e "${YELLOW}BadVPN ya está instalado.${NC}"
         return 1
     fi
-
     echo -e "${BLUE}Instalando BadVPN...${NC}"
     apt-get install cmake screen wget gcc build-essential g++ make -y
     wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/badvpn/badvpn-1.999.128.tar.bz2
@@ -44,7 +43,13 @@ install_badvpn() {
     cd badvpn-1.999.128/
     cmake ~/badvpn-1.999.128 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
     make install
-    
+    for port in $@; do
+        if validate_port $port; then
+            echo -e "${BLUE}Iniciando BadVPN en el puerto $port...${NC}"
+            badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
+            log_action "BadVPN iniciado en el puerto $port"
+        fi
+    done
     echo -e "${GREEN}✔ BadVPN ha sido instalado correctamente.${NC}"
     
     # Añade un alias al archivo .bashrc
@@ -153,7 +158,8 @@ while true; do
     case $option in
     1)
         echo -e "${YELLOW}Has seleccionado Instalar BadVPN.${NC}"
-        install_badvpn
+        read -p "Ingrese puertos para BadVPN (separados por un espacio: 7100 7200 ...): " ports
+        install_badvpn $ports
         ;;
     2)
         echo -e "${YELLOW}Has seleccionado Mostrar puertos de BadVPN activos.${NC}"

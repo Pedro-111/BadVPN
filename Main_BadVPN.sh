@@ -156,12 +156,18 @@ delete_script() {
     fi
 
     echo -e "${BLUE}Eliminando el script...${NC}"
-    script_name=$(basename "$0")
-    if rm "$0"; then
-        echo -e "${GREEN}✔ El script ha sido eliminado.${NC}"
-        log_action "Script eliminado"
+    script_path=$(realpath "$0")
+    if [ -f "$script_path" ]; then
+        if rm "$script_path"; then
+            echo -e "${GREEN}✔ El script ha sido eliminado.${NC}"
+            log_action "Script eliminado"
+            echo -e "${YELLOW}El script se ha eliminado. Este menú se cerrará ahora.${NC}"
+            exit 0
+        else
+            echo -e "${RED}✘ Hubo un error al intentar eliminar el script.${NC}"
+        fi
     else
-        echo -e "${RED}✘ Hubo un error al intentar eliminar el script.${NC}"
+        echo -e "${RED}✘ No se pudo encontrar el script para eliminarlo.${NC}"
     fi
 }
 

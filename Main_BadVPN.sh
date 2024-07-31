@@ -1,107 +1,68 @@
 #!/bin/bash
 
-# Definición de colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
 NC='\033[0m' # No Color
-
-# Función para registrar acciones
-log_action() {
-    echo "$(date): \$1" >> /var/log/badvpn_script.log
-}
-
-# Función para validar puertos
-validate_port() {
-    if ! [[ \$1 =~ ^[0-9]+$ ]] || [ \$1 -lt 1 ] || [ \$1 -gt 65535 ]; then
-        echo -e "${RED}Error: '\$1' no es un número de puerto válido.${NC}"
-        return 1
-    fi
-    return 0
-}
-
-# Función para verificar si BadVPN está instalado
-is_badvpn_installed() {
-    if [ -d ~/badvpn-1.999.128 ]; then
-        return 0
-    else
-        return 1
-    fi
-}
 
 # Función para instalar BadVPN
 install_badvpn() {
-    if is_badvpn_installed; then
-        echo -e "${YELLOW}BadVPN ya está instalado.${NC}"
+    if [ -d ~/badvpn-1.999.128 ]; then
+        echo "BadVPN ya está instalado."
         return 1
     fi
-    echo -e "${BLUE}Instalando BadVPN...${NC}"
-    apt-get install cmake screen wget gcc build-essential g++ make -y
+    echo "Instalando BadVPN..."
+    apt-get install cmake -y
+    apt-get install screen wget gcc build-essential g++ make -y
     wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/badvpn/badvpn-1.999.128.tar.bz2
     tar xf badvpn-1.999.128.tar.bz2
     cd badvpn-1.999.128/
     cmake ~/badvpn-1.999.128 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
     make install
     for port in $@; do
-        if validate_port $port; then
-            echo -e "${BLUE}Iniciando BadVPN en el puerto $port...${NC}"
-            badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
-            log_action "BadVPN iniciado en el puerto $port"
-        fi
+        echo "Iniciando BadVPN en el puerto $port..."
+        badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
     done
-    echo -e "${GREEN}✔ BadVPN ha sido instalado correctamente.${NC}"
 }
-
 # Función para mostrar los puertos de BadVPN activos
 show_active_badvpn_ports() {
-    echo -e "${BLUE}Mostrando los puertos de BadVPN activos...${NC}"
+    echo "Mostrando los puertos de BadVPN activos..."
     lsof -i | grep badvpn
 }
 
 # Función para abrir un puerto de BadVPN
 open_badvpn_port() {
-    port=\$1
-    if validate_port $port; then
-        echo -e "${BLUE}Abriendo el puerto $port de BadVPN...${NC}"
-        badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
-        log_action "Puerto $port de BadVPN abierto"
-        echo -e "${GREEN}✔ Puerto $port de BadVPN abierto correctamente.${NC}"
-    fi
+    port=$1
+    echo "Abriendo el puerto $port de BadVPN..."
+    badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
 }
-
 # Función para cerrar puerto BadVPN
 close_badvpn_port() {
-    port=\$1
-    if validate_port $port; then
-        echo -e "${BLUE}Cerrando el puerto $port de BadVPN...${NC}"
-        pid=$(lsof -t -i:$port)
-        if [ -z "$pid" ]; then
-            echo -e "${YELLOW}No se encontró ningún proceso escuchando en el puerto $port.${NC}"
+    port=$1
+    echo "Cerrando el puerto $port de BadVPN..."
+    pid=$(lsof -t -i:$port)
+    if [ -z "$pid" ]; then
+        echo "No se encontró ningún proceso escuchando en el puerto $port."
+    else
+        if kill $pid; then
+            echo "El puerto $port de BadVPN ha sido cerrado."
         else
-            if kill $pid; then
-                echo -e "${GREEN}✔ El puerto $port de BadVPN ha sido cerrado.${NC}"
-                log_action "Puerto $port de BadVPN cerrado"
-            else
-                echo -e "${RED}✘ Hubo un error al intentar cerrar el puerto $port de BadVPN.${NC}"
-            fi
+            echo "Hubo un error al intentar cerrar el puerto $port de BadVPN."
         fi
     fi
 }
 
 # Función para cerrar todos los puertos de BadVPN
 close_all_badvpn_ports() {
-    echo -e "${BLUE}Cerrando todos los puertos de BadVPN...${NC}"
+    echo "Cerrando todos los puertos de BadVPN..."
     pids=$(pgrep badvpn-udpgw)
     if [ -z "$pids" ]; then
-        echo -e "${YELLOW}No se encontraron procesos de BadVPN.${NC}"
+        echo "No se encontraron procesos de BadVPN."
     else
         for pid in $pids; do
             if kill $pid; then
-                echo -e "${GREEN}✔ El proceso de BadVPN con PID $pid ha sido cerrado.${NC}"
-                log_action "Proceso de BadVPN con PID $pid cerrado"
+                echo "El proceso de BadVPN con PID $pid ha sido cerrado."
             else
-                echo -e "${RED}✘ Hubo un error al intentar cerrar el proceso de BadVPN con PID $pid.${NC}"
+                echo "Hubo un error al intentar cerrar el proceso de BadVPN con PID $pid."
             fi
         done
     fi
@@ -109,28 +70,24 @@ close_all_badvpn_ports() {
 
 # Función para desinstalar BadVPN
 uninstall_badvpn() {
-    echo -e "${BLUE}Desinstalando BadVPN...${NC}"
+    echo "Desinstalando BadVPN..."
     if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; then
-        echo -e "${GREEN}✔ BadVPN ha sido desinstalado.${NC}"
+        echo "BadVPN ha sido desinstalado."
         close_all_badvpn_ports
-        log_action "BadVPN desinstalado"
     else
-        echo -e "${RED}✘ Hubo un error al intentar desinstalar BadVPN.${NC}"
+        echo "Hubo un error al intentar desinstalar BadVPN."
     fi
 }
 
 # Función para mostrar el menú
 show_menu() {
-    echo -e "${BLUE}╔════════════════════════════╗${NC}"
-    echo -e "${BLUE}║      ${GREEN}Menú de BadVPN${BLUE}        ║${NC}"
-    echo -e "${BLUE}╠════════════════════════════╣${NC}"
-    echo -e "${BLUE}║${NC} 1) Instalar BadVPN          ${BLUE}║${NC}"
-    echo -e "${BLUE}║${NC} 2) Mostrar puertos activos  ${BLUE}║${NC}"
-    echo -e "${BLUE}║${NC} 3) Abrir puerto             ${BLUE}║${NC}"
-    echo -e "${BLUE}║${NC} 4) Cerrar puerto            ${BLUE}║${NC}"
-    echo -e "${BLUE}║${NC} 5) Desinstalar BadVPN       ${BLUE}║${NC}"
-    echo -e "${BLUE}║${NC} 0) Salir                    ${BLUE}║${NC}"
-    echo -e "${BLUE}╚════════════════════════════╝${NC}"
+    echo -e "${GREEN}Por favor, selecciona una opción:${NC}"
+    echo "1) Instalar BadVPN"
+    echo "2) Mostrar puertos de BadVPN activos"
+    echo "3) Abrir puerto de BadVPN"
+    echo "4) Cerrar puerto de BadVPN"
+    echo "5) Desinstalar BadVPN"
+    echo "0) Salir"
 }
 
 # Bucle principal
@@ -139,34 +96,34 @@ while true; do
     read -p "Introduce tu opción: " option
     case $option in
     1)
-        echo -e "${YELLOW}Has seleccionado Instalar BadVPN.${NC}"
+        echo -e "${RED}Has seleccionado Instalar BadVPN.${NC}"
         read -p "Ingrese puertos para BadVPN (separados por un espacio: 7100 7200 ...): " ports
         install_badvpn $ports
         ;;
     2)
-        echo -e "${YELLOW}Has seleccionado Mostrar puertos de BadVPN activos.${NC}"
+        echo -e "${RED}Has seleccionado Mostrar puertos de BadVPN activos.${NC}"
         show_active_badvpn_ports
         ;;
     3)
-        echo -e "${YELLOW}Has seleccionado Abrir puerto de BadVPN.${NC}"
+        echo -e "${RED}Has seleccionado Abrir puerto de BadVPN.${NC}"
         read -p "Ingrese el puerto de BadVPN que desea abrir: " port
         open_badvpn_port $port
         ;;
     4)
-        echo -e "${YELLOW}Has seleccionado Cerrar puerto BadVPN.${NC}"
+        echo -e "${RED}Has seleccionado Cerrar puerto BadVPN.${NC}"
         read -p "Ingrese el puerto de BadVPN que desea cerrar: " port
         close_badvpn_port $port
         ;;
     5)
-        echo -e "${YELLOW}Has seleccionado Desinstalar BadVPN.${NC}"
+        echo -e "${RED}Has seleccionado Desinstalar BadVPN.${NC}"
         uninstall_badvpn
         ;;
     0)
-        echo -e "${GREEN}Saliendo...${NC}"
+        echo "Saliendo..."
         break
         ;;
     *)
-        echo -e "${RED}Opción no válida${NC}"
+        echo "Opción no válida"
         ;;
     esac
 done

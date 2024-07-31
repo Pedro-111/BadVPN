@@ -118,7 +118,16 @@ close_all_badvpn_ports() {
 
 # Función para desinstalar BadVPN y eliminar archivos descargados
 uninstall_badvpn() {
+    # Pregunta al usuario si desea continuar con la desinstalación
+    read -p "${YELLOW}¿Estás seguro de que deseas desinstalar BadVPN? Esto cerrará los puertos utilizados por BadVPN. (s/n) ${NC}" confirm
+    if [[ $confirm != [sS] ]]; then
+        echo -e "${RED}Desinstalación cancelada.${NC}"
+        return
+    fi
+
     echo -e "${BLUE}Desinstalando BadVPN...${NC}"
+
+    # Eliminar BadVPN
     if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; then
         echo -e "${GREEN}✔ BadVPN ha sido desinstalado.${NC}"
         close_all_badvpn_ports
@@ -136,6 +145,7 @@ uninstall_badvpn() {
         echo -e "${YELLOW}No se encontraron archivos descargados para eliminar.${NC}"
     fi
 }
+
 
 # Función para mostrar el menú
 show_menu() {

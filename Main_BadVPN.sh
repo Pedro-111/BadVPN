@@ -9,13 +9,13 @@ NC='\033[0m' # No Color
 
 # Función para registrar acciones
 log_action() {
-    echo "$(date): \$1" >> /var/log/badvpn_script.log
+    echo "$(date): $1" >> /var/log/badvpn_script.log
 }
 
 # Función para validar puertos
 validate_port() {
-    if ! [[ \$1 =~ ^[0-9]+$ ]] || [ \$1 -lt 1 ] || [ \$1 -gt 65535 ]; then
-        echo -e "${RED}Error: '\$1' no es un número de puerto válido.${NC}"
+    if ! [[ $1 =~ ^[0-9]+$ ]] || [ $1 -lt 1 ] || [ $1 -gt 65535 ]; then
+        echo -e "${RED}Error: '$1' no es un número de puerto válido.${NC}"
         return 1
     fi
     return 0
@@ -61,7 +61,7 @@ show_active_badvpn_ports() {
 
 # Función para abrir un puerto de BadVPN
 open_badvpn_port() {
-    port=\$1
+    port=$1
     if validate_port $port; then
         echo -e "${BLUE}Abriendo el puerto $port de BadVPN...${NC}"
         badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
@@ -72,7 +72,7 @@ open_badvpn_port() {
 
 # Función para cerrar puerto BadVPN
 close_badvpn_port() {
-    port=\$1
+    port=$1
     if validate_port $port; then
         echo -e "${BLUE}Cerrando el puerto $port de BadVPN...${NC}"
         pid=$(lsof -t -i:$port)
@@ -107,7 +107,7 @@ close_all_badvpn_ports() {
     fi
 }
 
-# Función para desinstalar BadVPN
+# Función para desinstalar BadVPN y eliminar archivos descargados
 uninstall_badvpn() {
     echo -e "${BLUE}Desinstalando BadVPN...${NC}"
     if rm -rf ~/badvpn-1.999.128 && rm ~/badvpn-1.999.128.tar.bz2; then
@@ -116,6 +116,15 @@ uninstall_badvpn() {
         log_action "BadVPN desinstalado"
     else
         echo -e "${RED}✘ Hubo un error al intentar desinstalar BadVPN.${NC}"
+    fi
+
+    # Eliminación de archivos descargados
+    if [ -f ~/badvpn-1.999.128.tar.bz2 ]; then
+        rm ~/badvpn-1.999.128.tar.bz2
+        echo -e "${GREEN}✔ Archivos descargados han sido eliminados.${NC}"
+        log_action "Archivos descargados eliminados"
+    else
+        echo -e "${YELLOW}No se encontraron archivos descargados para eliminar.${NC}"
     fi
 }
 

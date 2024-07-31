@@ -1,5 +1,8 @@
 # 🚀 Script de BadVPN
 
+![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04%20%7C%2020.04%20%7C%2022.04-orange)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue)
+
 Este script de Bash permite instalar **BadVPN** en el sistema operativo **Ubuntu 18.04 LTS**, **Ubuntu 20.04.6 LTS**, **Ubuntu 22.04 LTS**. También puedes probarlo en otras versiones de Ubuntu.
 
 ## 📥 Instalación

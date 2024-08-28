@@ -7,9 +7,19 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Directorio de instalación
+INSTALL_DIR="$HOME/.local/bin"
+
+# Función para comprobar si se necesita sudo
+need_sudo() {
+    if [ "$(id -u)" != "0" ]; then
+        echo "sudo"
+    fi
+}
+
 # Función para registrar acciones
 log_action() {
-    echo "$(date): $1" >> /var/log/badvpn_script.log
+    echo "$(date): $1" >> "$HOME/.badvpn_script.log"
 }
 
 # Función para validar puertos
@@ -23,7 +33,7 @@ validate_port() {
 
 # Función para verificar si BadVPN está instalado
 is_badvpn_installed() {
-    if [ -d ~/badvpn-1.999.128 ]; then
+    if [ -d "$HOME/badvpn-1.999.128" ]; then
         return 0
     else
         return 1
@@ -37,23 +47,23 @@ install_badvpn() {
         return 1
     fi
     echo -e "${BLUE}Instalando BadVPN...${NC}"
-    apt-get install cmake screen wget gcc build-essential g++ make -y
+    $(need_sudo) apt-get install cmake screen wget gcc build-essential g++ make -y
     wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/badvpn/badvpn-1.999.128.tar.bz2
     tar xf badvpn-1.999.128.tar.bz2
     cd badvpn-1.999.128/
     cmake ~/badvpn-1.999.128 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
-    make install
+    $(need_sudo) make install
     for port in $@; do
         if validate_port $port; then
             echo -e "${BLUE}Iniciando BadVPN en el puerto $port...${NC}"
-            badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
+            $(need_sudo) badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
             log_action "BadVPN iniciado en el puerto $port"
         fi
     done
     echo -e "${GREEN}✔ BadVPN ha sido instalado correctamente.${NC}"
     
     # Añade un alias al archivo .bashrc
-    echo "alias menu_badvpn='/menu/Main_BadVPN.sh'" >> ~/.bashrc
+    echo "alias menu_badvpn='$INSTALL_DIR/Main_BadVPN.sh'" >> ~/.bashrc
     echo -e "${BLUE}Alias 'menu_badvpn' añadido a ~/.bashrc.${NC}"
     
     # Recargar ~/.bashrc para aplicar alias
@@ -65,7 +75,7 @@ install_badvpn() {
 # Función para mostrar los puertos de BadVPN activos
 show_active_badvpn_ports() {
     echo -e "${BLUE}Mostrando los puertos de BadVPN activos...${NC}"
-    lsof -i | grep badvpn
+    $(need_sudo) lsof -i | grep badvpn
 }
 
 # Función para abrir un puerto de BadVPN
@@ -73,7 +83,7 @@ open_badvpn_port() {
     port=$1
     if validate_port $port; then
         echo -e "${BLUE}Abriendo el puerto $port de BadVPN...${NC}"
-        badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
+        $(need_sudo) badvpn-udpgw --listen-addr 127.0.0.1:$port >/dev/null &
         log_action "Puerto $port de BadVPN abierto"
         echo -e "${GREEN}✔ Puerto $port de BadVPN abierto correctamente.${NC}"
     fi
@@ -84,11 +94,11 @@ close_badvpn_port() {
     port=$1
     if validate_port $port; then
         echo -e "${BLUE}Cerrando el puerto $port de BadVPN...${NC}"
-        pid=$(lsof -t -i:$port)
+        pid=$($(need_sudo) lsof -t -i:$port)
         if [ -z "$pid" ]; then
             echo -e "${YELLOW}No se encontró ningún proceso escuchando en el puerto $port.${NC}"
         else
-            if kill $pid; then
+            if $(need_sudo) kill $pid; then
                 echo -e "${GREEN}✔ El puerto $port de BadVPN ha sido cerrado.${NC}"
                 log_action "Puerto $port de BadVPN cerrado"
             else
@@ -101,12 +111,12 @@ close_badvpn_port() {
 # Función para cerrar todos los puertos de BadVPN
 close_all_badvpn_ports() {
     echo -e "${BLUE}Cerrando todos los puertos de BadVPN...${NC}"
-    pids=$(pgrep badvpn-udpgw)
+    pids=$($(need_sudo) pgrep badvpn-udpgw)
     if [ -z "$pids" ]; then
         echo -e "${YELLOW}No se encontraron procesos de BadVPN.${NC}"
     else
         for pid in $pids; do
-            if kill $pid; then
+            if $(need_sudo) kill $pid; then
                 echo -e "${GREEN}✔ El proceso de BadVPN con PID $pid ha sido cerrado.${NC}"
                 log_action "Proceso de BadVPN con PID $pid cerrado"
             else
@@ -144,6 +154,17 @@ uninstall_badvpn() {
     else
         echo -e "${YELLOW}No se encontraron archivos descargados para eliminar.${NC}"
     fi
+
+    # Pregunta si se debe borrar el servicio BadVPN
+    read -p "${YELLOW}¿Deseas borrar el servicio BadVPN? (s/n) ${NC}" delete_service
+    if [[ $delete_service == [sS] ]]; then
+        $(need_sudo) systemctl stop badvpn
+        $(need_sudo) systemctl disable badvpn
+        $(need_sudo) rm /etc/systemd/system/badvpn.service
+        $(need_sudo) systemctl daemon-reload
+        echo -e "${GREEN}✔ Servicio BadVPN eliminado.${NC}"
+        log_action "Servicio BadVPN eliminado"
+    fi
 }
 
 # Función para eliminar el script
@@ -157,11 +178,21 @@ delete_script() {
     fi
 
     echo -e "${BLUE}Eliminando el script...${NC}"
-    script_path=$(realpath "$0")
+    script_path="$INSTALL_DIR/Main_BadVPN.sh"
     if [ -f "$script_path" ]; then
         if rm "$script_path"; then
             echo -e "${GREEN}✔ El script ha sido eliminado.${NC}"
             log_action "Script eliminado"
+            
+            # Eliminar alias del .bashrc
+            sed -i '/alias menu_badvpn/d' ~/.bashrc
+            echo -e "${GREEN}✔ Alias 'menu_badvpn' eliminado de ~/.bashrc.${NC}"
+            
+            # Eliminar archivos descargados
+            rm -f ~/badvpn-1.999.128.tar.bz2
+            rm -rf ~/badvpn-1.999.128
+            echo -e "${GREEN}✔ Archivos descargados eliminados.${NC}"
+            
             echo -e "${YELLOW}El script se ha eliminado. Este menú se cerrará ahora.${NC}"
             exit 0
         else
@@ -172,6 +203,24 @@ delete_script() {
     fi
 }
 
+# Función para actualizar el script
+update_script() {
+    echo -e "${BLUE}Actualizando el script...${NC}"
+    temp_file="/tmp/Main_BadVPN.sh"
+    if wget https://raw.githubusercontent.com/Pedro-111/BadVPN/main/Main_BadVPN.sh -O "$temp_file"; then
+        if mv "$temp_file" "$INSTALL_DIR/Main_BadVPN.sh"; then
+            chmod +x "$INSTALL_DIR/Main_BadVPN.sh"
+            echo -e "${GREEN}✔ El script ha sido actualizado correctamente.${NC}"
+            log_action "Script actualizado"
+            echo -e "${YELLOW}Por favor, reinicia el script para usar la versión actualizada.${NC}"
+            exit 0
+        else
+            echo -e "${RED}✘ Error al mover el archivo actualizado.${NC}"
+        fi
+    else
+        echo -e "${RED}✘ Error al descargar la actualización.${NC}"
+    fi
+}
 
 # Función para mostrar el menú
 show_menu() {
@@ -184,6 +233,7 @@ show_menu() {
     echo -e "${BLUE}║${NC} 4) Cerrar puerto            ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 5) Desinstalar BadVPN       ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 6) Eliminar script          ${BLUE}║${NC}"
+    echo -e "${BLUE}║${NC} 7) Actualizar script        ${BLUE}║${NC}"
     echo -e "${BLUE}║${NC} 0) Salir                    ${BLUE}║${NC}"
     echo -e "${BLUE}╚════════════════════════════╝${NC}"
 }
@@ -219,6 +269,10 @@ while true; do
     6)
         echo -e "${YELLOW}Has seleccionado Eliminar script.${NC}"
         delete_script
+        ;;
+    7)
+        echo -e "${YELLOW}Has seleccionado Actualizar script.${NC}"
+        update_script
         ;;
     0)
         echo -e "${GREEN}Saliendo...${NC}"

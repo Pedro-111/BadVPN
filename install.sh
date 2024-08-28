@@ -21,7 +21,7 @@ NC='\033[0m' # No Color
 # Función para instalar dependencias
 install_dependencies() {
     run_as_root apt-get update
-    run_as_root apt-get install -y curl wget
+    run_as_root apt-get install -y wget
 }
 
 # Instalar dependencias
@@ -30,9 +30,9 @@ install_dependencies
 # Crear el directorio de instalación si no existe
 mkdir -p "$INSTALL_DIR"
 
-# Descargar el script principal
+# Descargar el script principal usando wget
 echo "Descargando $SCRIPT_NAME..."
-curl -sSL "$GITHUB_RAW_URL/$SCRIPT_NAME" -o "$INSTALL_DIR/$SCRIPT_NAME"
+wget -q "$GITHUB_RAW_URL/$SCRIPT_NAME" -O "$INSTALL_DIR/$SCRIPT_NAME"
 
 # Hacer el script ejecutable
 chmod +x "$INSTALL_DIR/$SCRIPT_NAME"
@@ -51,9 +51,4 @@ source "$HOME/.bashrc"
 
 echo -e "${GREEN}Instalación completada. El comando 'menu_badvpn' está ahora disponible.${NC}"
 echo -e "${GREEN}Puede ejecutar 'menu_badvpn' en cualquier momento para gestionar BadVPN.${NC}"
-
-# Pregunta si el usuario quiere ejecutar el script ahora
-read -p "¿Deseas ejecutar el script ahora? (s/n): " run_now
-if [[ $run_now == [sS] ]]; then
-    "$INSTALL_DIR/$SCRIPT_NAME"
-fi
+echo -e "${GREEN}Si el comando no funciona inmediatamente, cierre y vuelva a abrir su terminal.${NC}"

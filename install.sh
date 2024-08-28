@@ -46,9 +46,6 @@ fi
 # Crear un alias
 echo "alias menu_badvpn='$INSTALL_DIR/$SCRIPT_NAME'" >> "$HOME/.bashrc"
 
-# Aplicar los cambios inmediatamente
-source "$HOME/.bashrc"
-
-echo -e "${GREEN}Instalación completada. El comando 'menu_badvpn' está ahora disponible.${NC}"
-echo -e "${GREEN}Puede ejecutar 'menu_badvpn' en cualquier momento para gestionar BadVPN.${NC}"
-echo -e "${GREEN}Si el comando no funciona inmediatamente, cierre y vuelva a abrir su terminal.${NC}"
+echo -e "${GREEN}Instalación completada. El comando 'menu_badvpn' estará disponible después de reiniciar la terminal.${NC}"
+echo -e "${GREEN}Puede ejecutar 'menu_badvpn' o '$INSTALL_DIR/$SCRIPT_NAME' para gestionar BadVPN.${NC}"
+echo -e "${GREEN}Por favor, cierre y vuelva a abrir su terminal para utilizar el comando 'menu_badvpn'.${NC}"

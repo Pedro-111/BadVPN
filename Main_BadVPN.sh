@@ -279,8 +279,8 @@ while true; do
         exit 0
         ;;
     *)
-        echo -e "${RED}Opción no válida${NC}"
-        sleep 2  # Espera 2 segundos antes de mostrar el menú de nuevo
+        echo -e "${RED}Opción no válida. Por favor, intenta de nuevo.${NC}"
+        sleep 2
         ;;
     esac
 done

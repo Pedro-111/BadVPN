@@ -47,5 +47,5 @@ fi
 echo "alias menu_badvpn='$INSTALL_DIR/$SCRIPT_NAME'" >> "$HOME/.bashrc"
 
 echo -e "${GREEN}Instalación completada. El comando 'menu_badvpn' estará disponible después de reiniciar la terminal.${NC}"
-echo -e "${GREEN}Puede ejecutar 'menu_badvpn' o '$INSTALL_DIR/$SCRIPT_NAME' para gestionar BadVPN.${NC}"
-echo -e "${GREEN}Por favor, cierre y vuelva a abrir su terminal para utilizar el comando 'menu_badvpn'.${NC}"
+echo -e "${GREEN}Puede ejecutar 'menu_badvpn' para gestionar BadVPN.${NC}"
+echo -e "${GREEN}Reinicia tu terminal con 'source ~/.bashrc'.${NC}"

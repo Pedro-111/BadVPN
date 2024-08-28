@@ -276,10 +276,11 @@ while true; do
         ;;
     0)
         echo -e "${GREEN}Saliendo...${NC}"
-        break
+        exit 0
         ;;
     *)
         echo -e "${RED}Opción no válida${NC}"
+        sleep 2  # Espera 2 segundos antes de mostrar el menú de nuevo
         ;;
     esac
 done
